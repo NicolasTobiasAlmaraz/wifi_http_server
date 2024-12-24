@@ -6,7 +6,7 @@
 - [Proxies](#proxies)
   - [Analogía](#analogía)
   - [Funciones generales](#funciones-generales)
--[Cliente: el user-agent](#cliente:-el-user-agent)
+- [Cliente: el user-agent](#cliente:-el-user-agent)
 - [El web server](#el-web-server)
 - [Características de HTTP](#características-de-http)
   -[Simplicidad](#simplicidad)
