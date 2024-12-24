@@ -5,6 +5,7 @@ El objetivo de este repositorio es estudiar el protocolo HTTP para montar un ser
 Introducción teórica al protocolo HTTP: [Estudio protocolo HTTP](link)
 
 ## 🧪Pruebas Concepto
+___
 ### 🛠️Prueba 1
 #### 📂Firmware
 Código Fuente: [sources_prueba_1](link)
@@ -15,8 +16,8 @@ El objetivo de la prueba 1 es diseñar una clase en C++ para el IDE de Arduino q
 Se tendrá un endpoint para togglear un led y otro para solicitar una medición.
 
 #### 🖥️Plataforma
-🛠️ Arduino IDE
-
+Arduino IDE
+___
 ### 🛠️Prueba 2
 #### 📂Firmware
 Código Fuente: [sources_prueba_2](link)
