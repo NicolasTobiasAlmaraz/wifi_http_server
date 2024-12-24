@@ -1,6 +1,6 @@
 # **Protocolo HTTP**
 
-[**Overview de HTTP	5**](#overview-de-http)
+[**Overview de HTTP**](#overview-de-http)
 - [Características Generales](#características-generales)
 - [Introducción Conceptual](#introducción-conceptual)
 - [Proxies](#proxies)
