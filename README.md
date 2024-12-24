@@ -7,7 +7,7 @@ En este repositorio encontrarán una introducción teórica al protoclo HTTP y d
 Nicolás Almaraz
 
 ## 🌐Protocolo HTTP
-Introducción teórica al protocolo HTTP: [Estudio protocolo HTTP](link)
+Introducción teórica al protocolo HTTP: [Estudio protocolo HTTP](https://github.com/NicolasTobiasAlmaraz/wifi_http_server/blob/main/investigacion/README.md)
 
 ___
 ## 🧪Prueba Concepto 1
