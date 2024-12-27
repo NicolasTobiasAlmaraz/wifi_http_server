@@ -1,16 +1,16 @@
-// main.ino
+#define LED_BUILTIN 2 //Led
+
 #include "MobileApp.h"
 
 //Defino credenciales WiFi e IP Fija
-const char *ssid = "ejemplo_wifi";  //SSID
-const char *psw = "12345678";       //PSW
-
-//Creo Handler para App movil
-MobileApp app(ssid, psw, IP_fija);
+const char *ssid = "ejemplo_wifi";      //SSID
+const char *psw = "12345678";           //PSW
+IPAddress ip = IPAddress(192,168,0,1);  //IP
+MobileApp app(ssid, psw, ip);
 
 //Defino los callbacks
-void handle_toggle_led(WiFiClient& client);   //Callback
-void handle_get_config(WiFiClient& client);   //Callback
+void* handle_toggle_led(void*);   //Callback
+void* handle_get_config(void*);   //Callback
 
 //Setup
 void setup() {
@@ -22,8 +22,8 @@ void setup() {
     Serial.print("Prueba Concepto Web Server");
     
     //Seteo Callbacks
-    app.set_toggle_led_cb(handle_toggle_led);
-    app.set_get_config_cb(handle_get_config);
+    app.set_callback_toggle_led(handle_toggle_led);
+    app.set_callback_get_config(handle_get_config);
 
     // Inicializo Red Wi-Fi y Web Server
     app.begin();
@@ -37,7 +37,7 @@ void loop() {
     app.handleClient();
 }
 
-void handle_toggle_led(WiFiClient& client) {
+void* handle_toggle_led(void*) {
     static bool led=false;
     if(led)
       led = false;
@@ -45,9 +45,10 @@ void handle_toggle_led(WiFiClient& client) {
       led = true;
     digitalWrite(LED_BUILTIN, led);
     Serial.print("Endpoint: toggle led");
-    
+    return 0;
 }
 
-void handle_get_config(WiFiClient& client) {
+void* handle_get_config(void *) {
     Serial.print("Endpoint: get config");
+    return 0;
 }
