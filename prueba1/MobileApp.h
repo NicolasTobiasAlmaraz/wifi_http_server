@@ -21,8 +21,8 @@ private:
     NetworkServer m_server; // HTTP server instance
     
     //Callbacks endpoints
-    void* (*toggle_led_cb)(void*) = nullptr;
-    void* (*get_config_cb)(void*) = nullptr;
+    response_set_led_t (*set_led_cb)(request_set_led_t) = nullptr; //Metodo POST: Request con body - Response con status code
+    response_get_config_t (*get_config_cb)(void) = nullptr;        //Metodo GET:  Request sin body - Response con status code y body
 
     //Metodos
     void http_request_manager(String request_line, String headers, String body, NetworkClient client);
@@ -30,6 +30,25 @@ private:
     int get_body_len(String headers);
     
 public:
+    // Constantes endpoint set led
+    typedef enum {LED_CHANGED, LED_ERROR} endpoint_set_led_status_code_t;    
+    typedef struct {
+      int pin;
+      bool state;
+    } request_set_led_t;
+    typedef struct {
+      endpoint_set_led_status_code_t status_code;
+    } response_set_led_t;
+
+    
+    // Constantes endpoint get config
+    typedef enum {CONFIG_OK} endpoint_get_config_status_code_t;    
+    typedef struct {
+      endpoint_get_config_status_code_t status_code;
+      float frequency;
+      float pressure;
+      float power;
+    } response_get_config_t;
     
     // Constructor
     MobileApp(const char* ssid, const char* password, IPAddress ip);
@@ -43,8 +62,8 @@ public:
     const char* getPassword() const;
 
     // Setters for HTTP request callbacks
-    void set_callback_get_config(void*(*callback)(void*));
-    void set_callback_toggle_led(void*(*callback)(void*));
+    void set_callback_get_config(  response_get_config_t (*callback) (void*)             );
+    void set_callback_set_led   (  response_set_led_t    (*callback) (request_set_led_t) );
 
     // Methods to start the server and handle requests
     void begin();

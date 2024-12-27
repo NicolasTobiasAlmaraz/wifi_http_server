@@ -22,7 +22,7 @@ void setup() {
     Serial.print("Prueba Concepto Web Server");
     
     //Seteo Callbacks
-    app.set_callback_toggle_led(handle_toggle_led);
+    app.set_callback_set_led(handle_set_led);
     app.set_callback_get_config(handle_get_config);
 
     // Inicializo Red Wi-Fi y Web Server
@@ -37,18 +37,15 @@ void loop() {
     app.handleClient();
 }
 
-void* handle_toggle_led(void*) {
-    static bool led=false;
-    if(led)
-      led = false;
-    else
-      led = true;
+void* handle_set_led(void*) {
+    
+    led = true;
     digitalWrite(LED_BUILTIN, led);
-    Serial.print("Endpoint: toggle led");
+    Serial.println("Endpoint: toggle led");
     return 0;
 }
 
 void* handle_get_config(void *) {
-    Serial.print("Endpoint: get config");
+    Serial.println("Endpoint: get config");
     return 0;
 }

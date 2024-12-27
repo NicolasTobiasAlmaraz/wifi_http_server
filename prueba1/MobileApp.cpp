@@ -33,13 +33,14 @@ const char* MobileApp::getPassword() const {
     return m_password;
 }
 
+
 // Set the callback for handling
-void MobileApp::set_callback_toggle_led(void*(*callback)(void*)) {
+void set_callback_set_led   (  response_set_led_t    (*callback) (request_set_led_t) ) {
     toggle_led_cb = callback;
 }
 
 // Set the callback for handling
-void MobileApp::set_callback_get_config(void*(*callback)(void*)) {
+void set_callback_get_config(   response_get_config_t(*callback)(void*)    ) {
     get_config_cb = callback;
 }
 
@@ -165,6 +166,7 @@ int MobileApp::get_body_len(String headers) {
     return content_length_value.toInt();
 }
 
+//Revisar
 void MobileApp::http_request_manager(String request_line, String headers, String body, NetworkClient client) {
     http_method_t http_method;
     
@@ -177,14 +179,23 @@ void MobileApp::http_request_manager(String request_line, String headers, String
     //Recupero el endpoint
     String endpoint_path = get_endpoint(request_line);
 
-    if(http_method == GET && endpoint_path.indexOf("path/del/endpoint1")==0 ) {
-        
+    if(http_method == GET && endpoint_path.indexOf("/get_config")==0 ) {
+        response_get_config_t response = get_config_cb();
+        stat_code = response.status_code;
+        headers = "Connection: Keep-Alive";
+        headers += "Content-Length: X";
+        body = ""; //todo json
+        send_http_response(status_code, headers, body);
     }
-
-    else if(http_method == POST && endpoint_path.indexOf("path/del/endpoint2")==0) {
-        
+    else if(http_method == POST && endpoint_path.indexOf("/set_led")==0) {
+        request_set_led_t struct_request;
+        response_set_led_t response = set_led_cb(struct_request);
+        stat_code = response.status_code;
+        headers = "Connection: Keep-Alive";
+        headers += "Type: application/plain-text";
+        body = "";
+        send_http_response(status_code, headers, body);
     }
-    
     else {
         // Send a 404 response for unknown endpoints
         client.println("HTTP/1.1 404 Not Found");
