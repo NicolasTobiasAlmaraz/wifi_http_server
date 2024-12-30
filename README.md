@@ -12,7 +12,7 @@ Introducción teórica al protocolo HTTP: [Estudio protocolo HTTP](https://githu
 ---
 ## 🧪Prueba Concepto 1
 ### 📂Firmware
-Código Fuente: [sources_prueba_1](link)
+Código Fuente: [sources_prueba_1](https://github.com/NicolasTobiasAlmaraz/wifi_http_server/tree/main/prueba1)
 
 ### 🎯Objetivo
 El objetivo de la prueba 1 es diseñar una clase en C++ para el IDE de Arduino que adminisitre la comunicación entre el sistema embebido y una interfaz Wi-Fi con el Web Server dentro.
@@ -28,7 +28,7 @@ Arduino IDE
 
 ## 🧪Prueba Concepto 2
 ### 📂Firmware
-Código Fuente: [sources_prueba_2](link)
+Código Fuente: [sources_prueba_2](https://github.com/NicolasTobiasAlmaraz/wifi_http_server/tree/main/prueba2)
 
 ### 🎯Objetivo
 El objetivo de esta prueba concepto es probar la administración la conexión Wi-Fi de los ESP32 gobernadas a través de solicitudes HTTP.
