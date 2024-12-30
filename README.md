@@ -23,7 +23,9 @@ Se tendrán dos endpoints:
 
 ### 🖥️Plataforma
 Arduino IDE
+
 ---
+
 ## 🧪Prueba Concepto 2
 ### 📂Firmware
 Código Fuente: [sources_prueba_2](link)
