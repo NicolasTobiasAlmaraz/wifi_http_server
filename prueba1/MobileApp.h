@@ -21,8 +21,9 @@ private:
     NetworkServer m_server; // HTTP server instance
     
     //Callbacks endpoints
-    response_set_led_t (*set_led_cb)(request_set_led_t) = nullptr; //Metodo POST: Request con body - Response con status code
-    response_get_config_t (*get_config_cb)(void) = nullptr;        //Metodo GET:  Request sin body - Response con status code y body
+    //Chequear sintaxis
+    response_set_led_t (set_led_cb)(request_set_led_t) = nullptr; //Metodo POST: Request con body - Response con status code
+    response_get_config_t (get_config_cb)(void) = nullptr;        //Metodo GET:  Request sin body - Response con status code y body
 
     //Metodos
     void http_request_manager(String request_line, String headers, String body, NetworkClient client);
