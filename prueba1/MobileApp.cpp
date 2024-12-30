@@ -150,6 +150,7 @@ void MobileApp::handleClient() {
   }
 }
 
+//Averigua cuanto vale el header "Content-Length:"
 int MobileApp::get_body_len(String headers) {
   String content_length_key = "Content-Length:";
   int start_index = headers.indexOf(content_length_key);
@@ -171,6 +172,7 @@ int MobileApp::get_body_len(String headers) {
   return content_length_value.toInt();
 }
 
+//Identifica la solicitud que llegó y toma acción para enviar el response
 void MobileApp::http_request_manager(String request_line, String req_headers, String req_body) {
   http_method_t http_method;
 
@@ -187,6 +189,8 @@ void MobileApp::http_request_manager(String request_line, String req_headers, St
   String resp_headers;
   String resp_body;
   StaticJsonDocument<200> doc;
+
+  //todo: Para implementar más prolijo, puede ser útil el uso de switch case, usando otra función que codifique a cada uno de los endpoints
   
   if (http_method == GET && endpoint_path.indexOf("/get_config") == 0 ) {
     response_get_config_t response = get_config_cb();
@@ -206,9 +210,10 @@ void MobileApp::http_request_manager(String request_line, String req_headers, St
   else if (http_method == POST && endpoint_path.indexOf("/set_led") == 0) {
     int body_len = get_body_len(req_body);
     DeserializationError error = deserializeJson(doc, req_body);
-    request_set_led_t struct_request;
     if(error)
       return;  
+    
+    request_set_led_t struct_request;
     struct_request.pin = doc["led"];
     struct_request.state = doc["state"];
     
@@ -227,12 +232,14 @@ void MobileApp::http_request_manager(String request_line, String req_headers, St
   send_http_response(stat_code, resp_headers, resp_body);
 }
 
+//Toma el path del request line
 String MobileApp::get_endpoint(String request_line) {
   int start = request_line.indexOf(" ") + 1;
   int end = request_line.indexOf(" ", start);
   return request_line.substring(start, end);
 }
 
+//Envia el response
 void MobileApp::send_http_response(int stat_code, const String& headers, const String& body) {
     // Formatear la línea de estado HTTP
     String status_line = "HTTP/1.1 ";
@@ -246,7 +253,6 @@ void MobileApp::send_http_response(int stat_code, const String& headers, const S
         case 500:
             status_line += "500 Internal Server Error";
             break;
-        // Puedes agregar más códigos de estado según sea necesario
         default:
             status_line += String(stat_code) + " Unknown Status";
             break;

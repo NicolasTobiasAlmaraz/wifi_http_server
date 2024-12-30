@@ -1,4 +1,5 @@
-#define LED_BUILTIN 2 //Led
+#define LED1 2 //Led
+#define LED2 18 //Led
 
 #include "MobileApp.h"
 #include "http_endpoints_types.h"
@@ -15,8 +16,9 @@ response_get_config_t    handle_get_config  (void);               //Callback
 
 //Setup
 void setup() {
-    //Inicializo led
-    pinMode(LED_BUILTIN, OUTPUT);
+    //Inicializo leds
+    pinMode(LED1, OUTPUT);
+    pinMode(LED2, OUTPUT);
     
     //Inicializo UART
     Serial.begin(115200);

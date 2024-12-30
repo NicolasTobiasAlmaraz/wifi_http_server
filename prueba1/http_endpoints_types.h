@@ -1,8 +1,10 @@
 #ifndef HTTP_ENDPOINTS_TYPES
 #define HTTP_ENDPOINTS_TYPES
 
-
+//##########################################################
 // Constantes endpoint set led
+//##########################################################
+
 typedef enum {LED_CHANGED, LED_ERROR} endpoint_set_led_status_code_t;    
 
 typedef struct {
@@ -15,7 +17,9 @@ typedef struct {
 } response_set_led_t;
 
     
+//##########################################################
 // Constantes endpoint get config
+//##########################################################
 typedef enum {CONFIG_OK} endpoint_get_config_status_code_t;    
 
 typedef struct {
