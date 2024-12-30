@@ -1,5 +1,5 @@
 # Servidor Web HTTP vía Wi-Fi
-El objetivo de este repositorio es estudiar el protocolo HTTP para montar un servidor Web en un ESP32.
+El objetivo de este repositorio es estudiar el protocolo HTTP para montar un servidor web en un ESP32.
 
 En este repositorio encontrarán una introducción teórica al protoclo HTTP y dos pruebas concepto en el microcontrolador.
 
