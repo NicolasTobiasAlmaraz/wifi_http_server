@@ -23,8 +23,10 @@ class MobileApp {
     void set_callback_set_led   (  response_set_led_t    (*callback_func) (request_set_led_t) );
 
     // Methods to start the server and handle requests
-    void begin();
-    void handleClient();
+    void begin();             //Init web server & wi-fi module
+    void handleClient();      //Loop for handle clients
+    void update_wifi_cred();  //Updates the wifi credentials (SSID & password)
+    void connect_as_STA_mode(String ssid, String psw);  //Updates the wifi credentials (SSID & password)
 
   private:
     //Typedefs
@@ -37,8 +39,8 @@ class MobileApp {
     IPAddress m_subnet = IPAddress(255, 255, 255, 0); // Mascara Subred
 
     //Var server
-    char m_ssid[100];         // Wi-Fi SSID
-    char m_password[100];     // Wi-Fi password
+    char m_ssid[50];         // Wi-Fi SSID
+    char m_password[50];     // Wi-Fi password
     NetworkServer m_server;   // HTTP server instance
     NetworkClient m_client;   // HTTP Client instance
 
@@ -49,7 +51,7 @@ class MobileApp {
     //Methods
     void http_request_manager(String request_line, String req_headers, String req_body);  //Recibe campos de la solicitud y toma acción
     String get_endpoint(String request_line);                                             //Toma el path del request line
-    int get_body_len(String headers);                                                     //Toma el header Content-Length
+    //int get_body_len(String headers);                                                     //Toma el header Content-Length
     void send_http_response(int stat_code, const String& headers, const String& body);    //Envia response al cliente
 };
 

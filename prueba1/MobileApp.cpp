@@ -1,62 +1,33 @@
-// MobileApp.cpp
+#include <WiFi.h>
+#include <ArduinoJson.h>
+
 #include "MobileApp.h"
 #include "http_endpoints_types.h"
-#include <ArduinoJson.h>
+
+#define LEDA 25 //Led
+#define LEDB 26 //Led
+#define LEDC 33 //Led
 
 // Constructor initializes the app with default SSID, password, and network configurations
 MobileApp::MobileApp(const char* ssid, const char* password, IPAddress ip) {
+  Serial.println("Construtor init");
   strcpy(m_ssid, ssid);
   strcpy(m_password , password);
   m_ip_host = ip;
   m_ip_gw = ip;
   m_subnet = IPAddress(255, 255, 255, 0);
+  Serial.println("Instancia network server");
   m_server = NetworkServer(80);
   set_led_cb = nullptr;
   get_config_cb = nullptr;
 }
 
-// Set a new SSID
-void MobileApp::setSSID(const char* ssid) {
-  strcpy(m_ssid, ssid);
-}
-
-// Get the current SSID
-const char* MobileApp::getSSID() const {
-  return m_ssid;
-}
-
-// Set a new password
-void MobileApp::setPassword(const char* password) {
-  strcpy(m_password , password);
-}
-
-// Get the current password
-const char* MobileApp::getPassword() const {
-  return m_password;
-}
-
-
-// Set the callback for handling
-void MobileApp::set_callback_set_led   (  response_set_led_t    (*callback_func) (request_set_led_t) ) {
-  set_led_cb = callback_func;
-}
-
-// Set the callback for handling
-void MobileApp::set_callback_get_config(   response_get_config_t(*callback_func)(void)    ) {
-  get_config_cb = callback_func;
-}
-
 // Start the Wi-Fi access point and the server
 void MobileApp::begin() {
-  WiFi.softAP(m_ssid, m_password); // Start the access point
+  Serial.println("Comenzando...");
+  WiFi.softAP(m_ssid, m_password);
   WiFi.softAPConfig(m_ip_host, m_ip_gw, m_subnet); // Configure the access point with IP settings
-  Serial.print("Init Wi-Fi Ok");
   m_server.begin(); // Start the HTTP server
-  Serial.print("HTTP Server Ok");
-  Serial.print("AP IP address: ");
-  Serial.println(WiFi.softAPIP()); // Print the access point IP address
-
-  Serial.print("Init App Ok");
 }
 
 // Handle incoming client requests
@@ -65,8 +36,8 @@ void MobileApp::handleClient() {
   http_method_t http_method;
   String headers;
   String body;
-  int body_len = 0;
-  int body_counter = 0;
+  //int body_len = 0;
+  //int body_counter = 0;
   http_parser_state_t state;
   int len;
   char last_char;
@@ -74,7 +45,6 @@ void MobileApp::handleClient() {
 
   //Si hay un cliente, me fijo que quiere
   if (m_client) {
-    Serial.println("New Client.");
     String current_section = "";
     state = REQUEST_LINE;
     request_line = "";
@@ -90,8 +60,8 @@ void MobileApp::handleClient() {
 
       //Voy acumulando letras de cada sección
       char c = m_client.read();
-      Serial.write(c);
       current_section += c;
+      Serial.print(c);
 
       //Analizo info
       switch (state) {
@@ -104,10 +74,12 @@ void MobileApp::handleClient() {
             request_line = current_section;
             current_section = "";
             state = HEADERS;
-            if ( request_line.indexOf("GET") >= 0 )
+            if ( request_line.indexOf("GET") >= 0 ) {
               http_method = GET;
-            if ( request_line.indexOf("POST") >= 0 )
+            }
+            if ( request_line.indexOf("POST") >= 0 ) {
               http_method = POST;
+            }
             //Por ahora solo implemento GET y POST
           }
           break;
@@ -121,8 +93,8 @@ void MobileApp::handleClient() {
             current_section = "";
             if (http_method == POST) {
               state = BODY;
-              body_len = get_body_len(headers);
-              body_counter = 0;
+              //body_len = get_body_len(headers);
+              //body_counter = 0;
             }
             else {
               state = ANALYZE;
@@ -132,8 +104,8 @@ void MobileApp::handleClient() {
           break;
 
         case BODY:
-          body_counter++;
-          if (body_counter == body_len) {
+          digitalWrite(LEDC,HIGH);
+          if (c == 'l') {
             state = ANALYZE;
             body = current_section;
             current_section = "";
@@ -141,6 +113,7 @@ void MobileApp::handleClient() {
           break;
 
         case ANALYZE:
+          digitalWrite(LEDA,HIGH);
           http_request_manager(request_line, headers, body);
           break;
       }
@@ -150,27 +123,32 @@ void MobileApp::handleClient() {
   }
 }
 
-//Averigua cuanto vale el header "Content-Length:"
-int MobileApp::get_body_len(String headers) {
-  String content_length_key = "Content-Length:";
-  int start_index = headers.indexOf(content_length_key);
-
-  if (start_index == -1) {
-    // Si no se encuentra el encabezado, devolvemos -1
-    return -1;
-  }
-
-  // Avanzamos después de "Content-Length:"
-  start_index += content_length_key.length();
-  int end_index = headers.indexOf('\n', start_index);
-
-  // Extraemos y limpiamos el valor
-  String content_length_value = headers.substring(start_index, end_index);
-  content_length_value.trim();
-
-  // Convertimos el valor a entero
-  return content_length_value.toInt();
-}
+////Averigua cuanto vale el header "Content-Length:"
+//int MobileApp::get_body_len(String headers) {
+//  String content_length_key = "Content-Length";
+//  int start_index = headers.indexOf(content_length_key);
+//
+//  if (start_index == -1) {
+//    // Si no se encuentra el encabezado, devolvemos -1
+//    return -1;
+//  }
+//
+//  // Avanzamos después de "Content-Length"
+//  //"Content Length": -->+2 correspondientes a ":
+//  start_index += content_length_key.length();
+//  start_index += 2;
+//
+//  //"Content Length":"XXX" --> Antes del \n hay que descontar la comilla "
+//  int end_index = headers.indexOf('\n', start_index);
+//  end_index-=1;
+//  
+//  // Extraemos y limpiamos el valor
+//  String content_length_value = headers.substring(start_index, end_index);
+//  content_length_value.trim();
+//
+//  // Convertimos el valor a entero
+//  return content_length_value.toInt();
+//}
 
 //Identifica la solicitud que llegó y toma acción para enviar el response
 void MobileApp::http_request_manager(String request_line, String req_headers, String req_body) {
@@ -208,7 +186,7 @@ void MobileApp::http_request_manager(String request_line, String req_headers, St
     resp_headers += "Content-Length: 53";
   }
   else if (http_method == POST && endpoint_path.indexOf("/set_led") == 0) {
-    int body_len = get_body_len(req_body);
+    int body_len = req_body.length();//get_body_len(req_body);
     DeserializationError error = deserializeJson(doc, req_body);
     if(error)
       return;  
@@ -272,4 +250,42 @@ void MobileApp::send_http_response(int stat_code, const String& headers, const S
     if (!body.isEmpty()) {
         m_client.println(body);
     }
+}
+
+// Set a new SSID
+void MobileApp::setSSID(const char* ssid) {
+  strcpy(m_ssid, ssid);
+}
+
+// Get the current SSID
+const char* MobileApp::getSSID() const {
+  return m_ssid;
+}
+
+// Set a new password
+void MobileApp::setPassword(const char* password) {
+  strcpy(m_password , password);
+}
+
+// Get the current password
+const char* MobileApp::getPassword() const {
+  return m_password;
+}
+
+// Set the callback for handling
+void MobileApp::set_callback_set_led   (  response_set_led_t    (*callback_func) (request_set_led_t) ) {
+  set_led_cb = callback_func;
+}
+
+// Set the callback for handling
+void MobileApp::set_callback_get_config(   response_get_config_t(*callback_func)(void)    ) {
+  get_config_cb = callback_func;
+}
+
+void MobileApp::update_wifi_cred() {
+  
+}
+
+void MobileApp::connect_as_STA_mode(String ssid, String psw) {
+  
 }

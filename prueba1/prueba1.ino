@@ -1,12 +1,15 @@
-#define LED1 2 //Led
-#define LED2 18 //Led
+#define LED1 2  //Led
+
+#define LEDA 25 //Led
+#define LEDB 26 //Led
+#define LEDC 33 //Led
 
 #include "MobileApp.h"
 #include "http_endpoints_types.h"
 
 //Defino credenciales WiFi e IP Fija
-const char *ssid = "ejemplo_wifi";      //SSID
-const char *psw = "12345678";           //PSW
+const char ssid[] = "ejemplo_wifi";      //SSID
+const char psw[] = "123456789";           //PSW
 IPAddress ip = IPAddress(192,168,0,1);  //IP
 MobileApp app(ssid, psw, ip);
 
@@ -18,11 +21,13 @@ response_get_config_t    handle_get_config  (void);               //Callback
 void setup() {
     //Inicializo leds
     pinMode(LED1, OUTPUT);
-    pinMode(LED2, OUTPUT);
-    
+    pinMode(LEDA, OUTPUT);
+    pinMode(LEDB, OUTPUT);
+    pinMode(LEDC, OUTPUT);
     //Inicializo UART
     Serial.begin(115200);
-    Serial.print("Prueba Concepto Web Server");
+    Serial.println("Prueba Concepto Web Server");
+    delay(1000);
     
     //Seteo Callbacks
     app.set_callback_set_led(handle_set_led);
@@ -30,8 +35,6 @@ void setup() {
 
     // Inicializo comunicacion con celular
     app.begin();
-    
-    Serial.print("Init Ok");
 }
 
 //Loop
