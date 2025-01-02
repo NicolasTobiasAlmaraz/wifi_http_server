@@ -38,7 +38,7 @@ def send_http_request(ip, path, method="POST", headers=None, body=None):
 ## Configuración
 esp32_ip = "192.168.0.1"  # Cambia esto por la IP de tu ESP32
 path = "/set_led"             # Cambia esto por el path adecuado
-method = "POST"            # Cambia a "GET" si es necesario
+method = "POST"            # Cambia a "GET" si es necesario.
 headers = {
     "Content-Type": "application/json",
 }
