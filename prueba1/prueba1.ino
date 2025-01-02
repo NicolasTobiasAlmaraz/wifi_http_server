@@ -27,7 +27,9 @@ void setup() {
     //Inicializo UART
     Serial.begin(115200);
     Serial.println("Prueba Concepto Web Server");
-    delay(1000);
+
+    //Seteo Frecuencia a 80M a  ver q hace
+    setCpuFrequencyMhz(80);
     
     //Seteo Callbacks
     app.set_callback_set_led(handle_set_led);
@@ -49,6 +51,8 @@ response_set_led_t handle_set_led(request_set_led_t request) {
     int led = request.pin;
     bool state = request.state;
 
+    Serial.println("---- En callback //Pin: "+String(led) + "//State: "+String(state));
+    
     //Procesamiento ...
     digitalWrite(led, state);
     Serial.println("Endpoint: set led");

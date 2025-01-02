@@ -5,7 +5,7 @@
 // Constantes endpoint set led
 //##########################################################
 
-typedef enum {LED_CHANGED, LED_ERROR} endpoint_set_led_status_code_t;    
+typedef enum {LED_CHANGED=200, LED_ERROR=500} endpoint_set_led_status_code_t;    
 
 typedef struct {
   int pin;
@@ -20,7 +20,7 @@ typedef struct {
 //##########################################################
 // Constantes endpoint get config
 //##########################################################
-typedef enum {CONFIG_OK} endpoint_get_config_status_code_t;    
+typedef enum {CONFIG_OK=200} endpoint_get_config_status_code_t;    
 
 typedef struct {
   endpoint_get_config_status_code_t status_code;

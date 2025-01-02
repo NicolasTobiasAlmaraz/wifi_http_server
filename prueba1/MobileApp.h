@@ -51,7 +51,7 @@ class MobileApp {
     //Methods
     void http_request_manager(String request_line, String req_headers, String req_body);  //Recibe campos de la solicitud y toma acción
     String get_endpoint(String request_line);                                             //Toma el path del request line
-    //int get_body_len(String headers);                                                     //Toma el header Content-Length
+    int get_body_len(String headers);                                                     //Toma el header Content-Length
     void send_http_response(int stat_code, const String& headers, const String& body);    //Envia response al cliente
 };
 

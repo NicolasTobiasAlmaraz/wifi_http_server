@@ -24,6 +24,8 @@ def send_http_request(ip, path, method="POST", headers=None, body=None):
         else:
             print("Método HTTP no soportado. Use 'GET' o 'POST'.")
             return None
+        
+        print("\n-------------------------------------------\n")
 
         print(f"Respuesta del servidor (código {response.status_code}):")
         print(response.text)
@@ -39,11 +41,10 @@ path = "/set_led"             # Cambia esto por el path adecuado
 method = "POST"            # Cambia a "GET" si es necesario
 headers = {
     "Content-Type": "application/json",
-    "Content-Length": "29",
 }
 body = {
     "led": "2",
-    "state": "1"
+    "state": "0",
 } if method.upper() == "POST" else None
 
 # Enviar solicitud
