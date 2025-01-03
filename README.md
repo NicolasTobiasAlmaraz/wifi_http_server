@@ -33,7 +33,7 @@ Código Fuente: [sources_prueba_2](https://github.com/NicolasTobiasAlmaraz/wifi_
 ### 🎯Objetivo
 El objetivo de esta prueba concepto es probar la administración la conexión Wi-Fi de los ESP32 gobernadas a través de solicitudes HTTP.
 Particularmente se intentará probar los endpoints:
-- POST "/wifi_off": Apaga red Wi-Fi
+- GET "/wifi_off": Apaga red Wi-Fi
 - POST "/change_ssid": Cambia nombre de red Wi-Fi
 - POST "/wifi_connect": Le das la orden de que se conecte a otra red Wi-Fi
 - GET "/wifi_connect_status": Verifica si ya se pudo conectar como STA a otra red
