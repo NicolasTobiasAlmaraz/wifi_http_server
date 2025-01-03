@@ -36,6 +36,7 @@ Particularmente se intentará probar los endpoints:
 - POST "/wifi_off": Apaga red Wi-Fi
 - POST "/change_ssid": Cambia nombre de red Wi-Fi
 - POST "/wifi_connect": Le das la orden de que se conecte a otra red Wi-Fi
+- GET "/wifi_connect_status": Verifica si ya se pudo conectar como STA a otra red
 
 ### 🖥️Plataforma
 Arduino IDE
