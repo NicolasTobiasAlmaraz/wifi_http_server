@@ -35,17 +35,39 @@ def send_http_request(ip, path, method="POST", headers=None, body=None):
         print(f"Error al enviar la solicitud: {e}")
         return None
 
-## Configuración
-esp32_ip = "192.168.0.1"  # Cambia esto por la IP de tu ESP32
-path = "/set_led"             # Cambia esto por el path adecuado
-method = "POST"            # Cambia a "GET" si es necesario.
-headers = {
-    "Content-Type": "application/json",
-}
-body = {
-    "led": "2",
-    "state": "0",
-} if method.upper() == "POST" else None
+def send_led(state):
+    ## Configuración
+    esp32_ip = "192.168.0.1"  
+    path = "/set_led"             
+    method = "POST"           
+    headers = {
+        "Content-Type": "application/json",
+    }
+    if(state == 0):
+        body = {
+            "led": "2",
+            "state": "0",
+        } if method.upper() == "POST" else None
+    else:
+        body = {
+            "led": "2",
+            "state": "1",
+        } if method.upper() == "POST" else None
+        
+    # Enviar solicitud
+    send_http_request(esp32_ip, path, method=method, headers=headers, body=body)
 
-# Enviar solicitud
-send_http_request(esp32_ip, path, method=method, headers=headers, body=body)
+
+def send_get_config():
+    esp32_ip = "192.168.0.1"  
+    path = "/get_config"             
+    method = "GET"           
+    headers = {
+        "Content-Type": "application/json",
+    }
+    # Enviar solicitud
+    send_http_request(esp32_ip, path, method=method, headers=headers, body=None)
+
+#send_led(0)
+send_led(1)
+send_get_config()

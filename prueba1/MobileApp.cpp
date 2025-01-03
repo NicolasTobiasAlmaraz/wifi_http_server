@@ -122,7 +122,6 @@ bool MobileApp::http_request_parser() {
       //Ya llegó el \r\n
       req_headers = current_section;
       current_section = "";
-      Serial.println(req_headers);
       
       //Si era metodo POST, voy al body
       if (http_method == POST) {
@@ -230,9 +229,9 @@ void MobileApp::handler_endpoint_get_config() {
   String resp_headers;
   String resp_body;
   StaticJsonDocument<200> doc;
-
+  
   response_get_config_t response = get_config_cb();
-
+  
   stat_code = response.status_code;
 
   //Creo un json doc
@@ -265,8 +264,6 @@ String MobileApp::get_endpoint(String request_line) {
 
 //Envia el response
 void MobileApp::send_http_response(int stat_code, const String& headers, const String& body) {
-  Serial.println("----Inicio response ---:");
-
   // Formatear la línea de estado HTTP
   String status_line = "HTTP/1.1 ";
   switch (stat_code) {
@@ -285,25 +282,20 @@ void MobileApp::send_http_response(int stat_code, const String& headers, const S
   }
   // Imprimir la línea de estado
   m_client.println(status_line);
-  Serial.println(status_line);
 
   // Imprimir los headers si no son nulos
   if (!headers.isEmpty()) {
     m_client.println(headers);
-    Serial.println(headers);
   } else
     return;
 
   // Finalizar los headers con una línea vacía
   m_client.println();
-  Serial.println();
 
   // Imprimir el cuerpo si no es nulo
   if (!body.isEmpty()) {
     m_client.println(body);
-    Serial.println(body);
   }
-  Serial.println("------Fin response------");
 }
 
 // Set a new SSID

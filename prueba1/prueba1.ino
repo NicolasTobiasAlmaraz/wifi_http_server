@@ -46,9 +46,10 @@ response_set_led_t handle_set_led(request_set_led_t request) {
     bool state = request.state;
 
     //Procesamiento ...
-    Serial.println("---- En callback //Pin: "+String(led) + "//State: "+String(state));
-    digitalWrite(led, state);
     Serial.println("Endpoint: set led");
+    Serial.println("Pin: "+String(led));
+    Serial.println("State: "+String(state));
+    digitalWrite(led, state);
     //...
     
     response_set_led_t response;
@@ -67,7 +68,7 @@ response_get_config_t handle_get_config(void) {
     response_get_config_t response;
     response.status_code = CONFIG_OK;
     response.frequency = 50;
-    response.pressure = 10;
+    response.pressure = 7.2;
     response.power = 100;
     return response;
 }
