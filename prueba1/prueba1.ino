@@ -1,9 +1,5 @@
 #define LED1 2  //Led
 
-#define LEDA 25 //Led
-#define LEDB 26 //Led
-#define LEDC 33 //Led
-
 #include "MobileApp.h"
 #include "http_endpoints_types.h"
 
@@ -19,11 +15,9 @@ response_get_config_t    handle_get_config  (void);               //Callback
 
 //Setup
 void setup() {
-    //Inicializo leds
+    //Inicializo led
     pinMode(LED1, OUTPUT);
-    pinMode(LEDA, OUTPUT);
-    pinMode(LEDB, OUTPUT);
-    pinMode(LEDC, OUTPUT);
+    
     //Inicializo UART
     Serial.begin(115200);
     Serial.println("Prueba Concepto Web Server");
@@ -41,7 +35,7 @@ void setup() {
 
 //Loop
 void loop() {
-    //Atiendo Clientes
+    //Atiendo clientes -> Non blocling function
     app.handleClient();
 }
 
@@ -51,9 +45,8 @@ response_set_led_t handle_set_led(request_set_led_t request) {
     int led = request.pin;
     bool state = request.state;
 
-    Serial.println("---- En callback //Pin: "+String(led) + "//State: "+String(state));
-    
     //Procesamiento ...
+    Serial.println("---- En callback //Pin: "+String(led) + "//State: "+String(state));
     digitalWrite(led, state);
     Serial.println("Endpoint: set led");
     //...

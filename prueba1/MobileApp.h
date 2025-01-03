@@ -30,8 +30,9 @@ class MobileApp {
 
   private:
     //Typedefs
-    typedef enum {GET, POST} http_method_t;                                   //Metodos HTTP
-    typedef enum {REQUEST_LINE, HEADERS, BODY, ANALYZE} http_parser_state_t;  //Estados
+    typedef enum {NO_CLIENT, PARSING_REQUEST}general_state_t; //general state machine 
+    typedef enum {GET, POST} http_method_t;                                     // HTTP
+    typedef enum {REQUEST_LINE, HEADERS, BODY} http_request_state_t;   //Estados
 
     //Config server
     IPAddress m_ip_host = IPAddress(192, 168, 0, 1);  // IP Servidor
@@ -48,11 +49,26 @@ class MobileApp {
     response_set_led_t (*set_led_cb)(request_set_led_t); //Metodo POST: Request con body - Response con status code
     response_get_config_t (*get_config_cb)(void);        //Metodo GET:  Request sin body - Response con status code y body
 
-    //Methods
-    void http_request_manager(String request_line, String req_headers, String req_body);  //Recibe campos de la solicitud y toma acción
+    //Methods to parse HTTP request
+    bool http_request_parser();
+    void http_request_manager();
     String get_endpoint(String request_line);                                             //Toma el path del request line
     int get_body_len(String headers);                                                     //Toma el header Content-Length
+
+    //Request parts
+    String request_line;
+    http_method_t http_method;
+    String req_headers;
+    String req_body;
+    String endpoint_path;
+
+    //Method to send responses
     void send_http_response(int stat_code, const String& headers, const String& body);    //Envia response al cliente
+    
+    //Methods to handle responses
+    void handler_endpoint_set_led();
+    void handler_endpoint_get_config();
+    void handler_not_found_endpoint();
 };
 
 #endif
