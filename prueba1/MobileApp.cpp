@@ -18,9 +18,12 @@ MobileApp::MobileApp(const char* ssid, const char* password, IPAddress ip) {
   get_config_cb = nullptr;
 }
 
+//==================================================================
+// Request Response Handlers
+//==================================================================
+
 // Start the Wi-Fi access point and the server
 void MobileApp::begin() {
-  Serial.println("Comenzando...");
   WiFi.softAP(m_ssid, m_password);
   WiFi.softAPConfig(m_ip_host, m_ip_gw, m_subnet); // Configure the access point with IP settings
   m_server.begin(); // Start the HTTP server
@@ -172,6 +175,68 @@ int MobileApp::get_body_len(String headers) {
   return content_length_value.toInt();
 }
 
+//Toma el path del request line
+String MobileApp::get_endpoint(String request_line) {
+  int start = request_line.indexOf(" ") + 1;
+  int end = request_line.indexOf(" ", start);
+  return request_line.substring(start, end);
+}
+
+
+//Envia el response
+void MobileApp::send_http_response(int stat_code, const String& headers, const String& body) {
+  // Formatear la línea de estado HTTP
+  String status_line = "HTTP/1.1 ";
+  switch (stat_code) {
+    case 200:
+      status_line += "200 OK";
+      break;
+    case 404:
+      status_line += "404 Not Found";
+      break;
+    case 500:
+      status_line += "500 Internal Server Error";
+      break;
+    default:
+      status_line += String(stat_code) + " Unknown Status";
+      break;
+  }
+  // Imprimir la línea de estado
+  m_client.println(status_line);
+
+  // Imprimir los headers si no son nulos
+  if (!headers.isEmpty()) {
+    m_client.println(headers);
+  } else
+    return;
+
+  // Finalizar los headers con una línea vacía
+  m_client.println();
+
+  // Imprimir el cuerpo si no es nulo
+  if (!body.isEmpty()) {
+    m_client.println(body);
+  }
+}
+
+//==================================================================
+// Set callbacks
+//==================================================================
+
+// Set the callback for handling
+void MobileApp::set_callback_set_led   (  response_set_led_t    (*callback_func) (request_set_led_t) ) {
+  set_led_cb = callback_func;
+}
+
+// Set the callback for handling
+void MobileApp::set_callback_get_config(   response_get_config_t(*callback_func)(void)    ) {
+  get_config_cb = callback_func;
+}
+
+//==================================================================
+// Handling endpoints
+//==================================================================
+
 //Identifica la solicitud que llegó y toma acción para enviar el response
 void MobileApp::http_request_manager() {
   if (http_method == GET && endpoint_path.indexOf("/get_config") == 0 ) {
@@ -179,6 +244,9 @@ void MobileApp::http_request_manager() {
   }
   else if (http_method == POST && endpoint_path.indexOf("/set_led") == 0) {
     handler_endpoint_set_led();
+  } 
+  else if (http_method == POST && endpoint_path.indexOf("/new_ssid") == 0) {
+    handler_endpoint_new_ssid();
   }
   else {
     handler_not_found_endpoint();
@@ -247,6 +315,41 @@ void MobileApp::handler_endpoint_get_config() {
   send_http_response(stat_code, resp_headers, resp_body);
 }
 
+void MobileApp::handler_endpoint_new_ssid() {
+  int stat_code;
+  String resp_headers;
+  String resp_body;
+  StaticJsonDocument<200> doc;
+
+  //Parseo Json
+  DeserializationError error = deserializeJson(doc, req_body);
+  if (error != DeserializationError::Ok) {
+    Serial.println("Error en el json");
+    Serial.println(error.c_str());
+    return;
+  }
+  request_new_ssid_t struct_request;
+  struct_request.new_ssid = doc["ssid"].as<String>();
+  
+  //Pongo un body
+  resp_body = "Cambiando SSID";
+
+  //Cargo status code
+  stat_code = 200;
+
+  //Pongo headers
+  resp_headers += "Connection: close\r\n";
+  resp_headers += "Content-Type: text/plain\r\n";
+  resp_headers += "Access-Control-Allow-Origin: *\r\n";
+  resp_headers += "Content-Length: " + String(resp_body.length());
+
+  //Envio respuesta
+  send_http_response(stat_code, resp_headers, resp_body);
+ 
+  //Cambio SSID
+  update_wifi_ssid(struct_request.new_ssid);
+}
+
 //Handler Not Found request
 void MobileApp::handler_not_found_endpoint() {
   // Send a 404 response for unknown endpoints
@@ -255,83 +358,39 @@ void MobileApp::handler_not_found_endpoint() {
   m_client.println();
 }
 
-//Toma el path del request line
-String MobileApp::get_endpoint(String request_line) {
-  int start = request_line.indexOf(" ") + 1;
-  int end = request_line.indexOf(" ", start);
-  return request_line.substring(start, end);
-}
+//==================================================================
+// Wi-Fi network actions
+//==================================================================
 
-//Envia el response
-void MobileApp::send_http_response(int stat_code, const String& headers, const String& body) {
-  // Formatear la línea de estado HTTP
-  String status_line = "HTTP/1.1 ";
-  switch (stat_code) {
-    case 200:
-      status_line += "200 OK";
-      break;
-    case 404:
-      status_line += "404 Not Found";
-      break;
-    case 500:
-      status_line += "500 Internal Server Error";
-      break;
-    default:
-      status_line += String(stat_code) + " Unknown Status";
-      break;
-  }
-  // Imprimir la línea de estado
-  m_client.println(status_line);
+void MobileApp::update_wifi_ssid(String ssid) {
+    Serial.println("Esperando a que se desconecte el cliente...");
+    do{}
+    while(m_client.connected());
+    
+    // Apagar servidor TCP
+    Serial.println("Apagando servidor...");
+    m_server.stop();
 
-  // Imprimir los headers si no son nulos
-  if (!headers.isEmpty()) {
-    m_client.println(headers);
-  } else
-    return;
+    // Apagar red WiFi
+    Serial.println("Apagando red wifi...");
+    WiFi.disconnect(true); // Desconectar y eliminar configuraciones previas
+    WiFi.mode(WIFI_OFF);   // Apagar módulo WiFi
+    
+    Serial.println("Esperando 2 seg...");
+    delay(2000);           // Esperar para asegurarse de que se apague
 
-  // Finalizar los headers con una línea vacía
-  m_client.println();
+    // Guardar nueva SSID
+    Serial.println("Guardando SSID...");
+    strcpy(m_ssid, ssid.c_str());
 
-  // Imprimir el cuerpo si no es nulo
-  if (!body.isEmpty()) {
-    m_client.println(body);
-  }
-}
+    // Reiniciar WiFi y configurar como Access Point
+    Serial.println("Iniciando wifi...");
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(m_ssid, m_password);
+    WiFi.softAPConfig(m_ip_host, m_ip_gw, m_subnet); // Configurar ajustes de red
 
-// Set a new SSID
-void MobileApp::setSSID(const char* ssid) {
-  strcpy(m_ssid, ssid);
-}
-
-// Get the current SSID
-const char* MobileApp::getSSID() const {
-  return m_ssid;
-}
-
-// Set a new password
-void MobileApp::setPassword(const char* password) {
-  strcpy(m_password , password);
-}
-
-// Get the current password
-const char* MobileApp::getPassword() const {
-  return m_password;
-}
-
-// Set the callback for handling
-void MobileApp::set_callback_set_led   (  response_set_led_t    (*callback_func) (request_set_led_t) ) {
-  set_led_cb = callback_func;
-}
-
-// Set the callback for handling
-void MobileApp::set_callback_get_config(   response_get_config_t(*callback_func)(void)    ) {
-  get_config_cb = callback_func;
-}
-
-void MobileApp::update_wifi_cred() {
-
-}
-
-void MobileApp::connect_as_STA_mode(String ssid, String psw) {
-
+    // Reiniciar el servidor TCP
+    Serial.println("Iniciando servidor");
+    m_server = NetworkServer(80);
+    m_server.begin();
 }

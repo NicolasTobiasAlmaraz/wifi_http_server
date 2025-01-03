@@ -5,7 +5,7 @@
 
 //Defino credenciales WiFi e IP Fija
 const char ssid[] = "ejemplo_wifi";      //SSID
-const char psw[] = "123456789";           //PSW
+const char psw[] = "admin1234";           //PSW
 IPAddress ip = IPAddress(192,168,0,1);  //IP
 MobileApp app(ssid, psw, ip);
 

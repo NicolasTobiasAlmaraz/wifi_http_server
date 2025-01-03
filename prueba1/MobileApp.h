@@ -10,14 +10,6 @@ class MobileApp {
     // Constructor
     MobileApp(const char* ssid, const char* password, IPAddress ip);
 
-    // Setters and getters for SSID
-    void setSSID(const char* newSsid);
-    const char* getSSID() const;
-
-    // Setters and getters for Password
-    void setPassword(const char* newPassword);
-    const char* getPassword() const;
-
     // Setters for HTTP request callbacks
     void set_callback_get_config(  response_get_config_t (*callback_func) (void)             );
     void set_callback_set_led   (  response_set_led_t    (*callback_func) (request_set_led_t) );
@@ -25,9 +17,7 @@ class MobileApp {
     // Methods to start the server and handle requests
     void begin();             //Init web server & wi-fi module
     void handleClient();      //Loop for handle clients
-    void update_wifi_cred();  //Updates the wifi credentials (SSID & password)
-    void connect_as_STA_mode(String ssid, String psw);  //Updates the wifi credentials (SSID & password)
-
+    
   private:
     //Typedefs
     typedef enum {NO_CLIENT, PARSING_REQUEST}general_state_t; //general state machine 
@@ -49,12 +39,13 @@ class MobileApp {
     response_set_led_t (*set_led_cb)(request_set_led_t); //Metodo POST: Request con body - Response con status code
     response_get_config_t (*get_config_cb)(void);        //Metodo GET:  Request sin body - Response con status code y body
 
-    //Methods to parse HTTP request
+    //Methods to parse HTTP request and send responses
     bool http_request_parser();
     void http_request_manager();
     String get_endpoint(String request_line);                                             //Toma el path del request line
     int get_body_len(String headers);                                                     //Toma el header Content-Length
-
+    void send_http_response(int stat_code, const String& headers, const String& body);    //Envia response al cliente
+    
     //Request parts
     String request_line;
     http_method_t http_method;
@@ -62,13 +53,16 @@ class MobileApp {
     String req_body;
     String endpoint_path;
 
-    //Method to send responses
-    void send_http_response(int stat_code, const String& headers, const String& body);    //Envia response al cliente
-    
     //Methods to handle responses
     void handler_endpoint_set_led();
     void handler_endpoint_get_config();
+    void handler_endpoint_new_ssid();
     void handler_not_found_endpoint();
+
+    //Wi-Fi actions
+    void update_wifi_ssid(String ssid);
+    void turn_off_wifi();
+    void turn_on_wifi();
 };
 
 #endif
