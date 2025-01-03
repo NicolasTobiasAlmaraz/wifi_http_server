@@ -57,20 +57,6 @@ def send_led(state):
     # Enviar solicitud
     send_http_request(esp32_ip, path, method=method, headers=headers, body=body)
 
-def send_new_ssid(ssid):
-    ## Configuración
-    esp32_ip = "192.168.0.1"  
-    path = "/new_ssid"             
-    method = "POST"           
-    headers = {
-        "Content-Type": "application/json",
-    }
-    body = {
-        "ssid": ssid,
-    } if method.upper() == "POST" else None    
-    
-    # Enviar solicitud
-    send_http_request(esp32_ip, path, method=method, headers=headers, body=body)
 
 def send_get_config():
     esp32_ip = "192.168.0.1"  
@@ -82,6 +68,6 @@ def send_get_config():
     # Enviar solicitud
     send_http_request(esp32_ip, path, method=method, headers=headers, body=None)
 
-send_led(0)
-#send_get_config()
-#send_new_ssid("nueva_ssid4")
+#send_led(0)
+send_led(1)
+send_get_config()
