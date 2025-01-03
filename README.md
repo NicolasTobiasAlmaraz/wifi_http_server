@@ -31,11 +31,11 @@ Arduino IDE
 Código Fuente: [sources_prueba_2](https://github.com/NicolasTobiasAlmaraz/wifi_http_server/tree/main/prueba2)
 
 ### 🎯Objetivo
-El objetivo de esta prueba concepto es probar la administración la conexión Wi-Fi de los ESP32 gobernadas a través de solicitudes HTTP.
-Particularmente se intentará probar los endpoints:
-- POST "/change_ssid": Cambia nombre de red Wi-Fi
-- POST "/wifi_connect": Le das la orden de que se conecte a otra red Wi-Fi
+El objetivo de esta prueba concepto es probar el funcionamiento del ESP32 como STA/AP, para eso temdrá el siguiente web server:
+- POST "/connect_wifi": Se conecta a una red Wi-Fi
 - GET "/wifi_connect_status": Verifica si ya se pudo conectar como STA a otra red
+
+El objetivo es que se conecte a un AP brindado por el cliente. Por otro lado, tendrá un endpoint al cual le consultarán si pudo conectarse o no.
 
 ### 🖥️Plataforma
 Arduino IDE
