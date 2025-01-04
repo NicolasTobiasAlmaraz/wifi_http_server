@@ -17,9 +17,12 @@ Código Fuente: [sources_prueba_1](https://github.com/NicolasTobiasAlmaraz/wifi_
 ### 🎯Objetivo
 El objetivo de la prueba 1 es diseñar una clase en C++ para el IDE de Arduino que adminisitre la comunicación entre el sistema embebido y una interfaz Wi-Fi con el Web Server dentro.
 
-Se tendrán dos endpoints:
+Se tendrán los endpoints:
 - Endpoint POST "/set_led": setea el estado del led indicado.
 - Endpoint GET "/get_config": Retorna la configuración cargada.
+- Endpoint POST "/new_ssid": Actualiza el nombre de la red Wi-Fi.
+
+Para probar a cada uno de estos endpoints se provee un cliente para utilizarse desde un script de python
 
 ### 🖥️Plataforma
 Arduino IDE
@@ -33,9 +36,23 @@ Código Fuente: [sources_prueba_2](https://github.com/NicolasTobiasAlmaraz/wifi_
 ### 🎯Objetivo
 El objetivo de esta prueba concepto es probar el funcionamiento del ESP32 como STA/AP, para eso temdrá el siguiente web server:
 - POST "/connect_wifi": Se conecta a una red Wi-Fi
-- GET "/wifi_connect_status": Verifica si ya se pudo conectar como STA a otra red
+- GET "/wifi_connect_status": Verifica si ya se pudo conectar como STA a otra red y además si la red es compatible
 
-El objetivo es que se conecte a un AP brindado por el cliente. Por otro lado, tendrá un endpoint al cual le consultarán si pudo conectarse o no.
+Para esta prueba, se combina con la Prueba Concepto 1:
+- ESP32_A: tiene el firmware de la prueba concepto 1
+- ESP32_B: tiene el firmware de la prueba concepto 2
+- 
+La prueba consiste en lo siguiente:
+- Mediante un cliente se le indica al ESP32_A las credenciales del ESP32_B
+- El ESP32_A usa el endpoint /get_config y verifica que los parámetros sean compatibles
+  - Si los parámetros son comparibles se queda conectado
+  - Si los parámetros no son compatibles se desconecta
+ 
+En todo momento puede consultarse el estado de la conexión con el endpoint /wifi_connect_status:
+- Desconectado
+- Conectado
+- Conectando
+- No compatible
 
 ### 🖥️Plataforma
 Arduino IDE
