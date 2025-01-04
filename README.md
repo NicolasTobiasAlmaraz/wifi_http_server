@@ -51,7 +51,7 @@ La prueba consiste en lo siguiente:
 En todo momento puede consultarse el estado de la conexión con el endpoint /wifi_connect_status:
 - Desconectado
 - Conectado
-- Conectando
+- Verificando
 - No compatible
 
 ### 🖥️Plataforma
