@@ -39,14 +39,14 @@ def send_http_request(ip, path, method="POST", headers=None, body=None):
 def send_wifi_connect(ssid,psw):
     ## Configuración
     esp32_ip = "192.168.0.1"  
-    path = "/wifi_connect"             
+    path = "/connect_wifi"             
     method = "POST"           
     headers = {
         "Content-Type": "application/json",
     }
     body = {
         "ssid": ssid,
-        "psw": psw,
+        "password": psw,
     } if method.upper() == "POST" else None    
     
     # Enviar solicitud
@@ -55,20 +55,22 @@ def send_wifi_connect(ssid,psw):
 def send_wifi_connect_status():
     ## Configuración
     esp32_ip = "192.168.0.1"  
-    path = "/wifi_connect_status"             
+    path = "/connect_wifi_status"             
     method = "GET"           
     headers = {
         "Content-Type": "application/json",
     }
+    headers = None
     
     # Enviar solicitud
     send_http_request(esp32_ip, path, method=method, headers=headers, body=None)
 
 #Envio credenciales
 send_wifi_connect_status()
-send_wifi_connect("ejemplo_wifi","admin1234")
+send_wifi_connect("ESP32_MASER","master1234")
+time.sleep(5)
 
 #Chequeo estado cada 1 seg
-for i in range(0,10):
+for i in range(0,5):
     send_wifi_connect_status()
     time.sleep(1)
