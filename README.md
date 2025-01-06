@@ -22,10 +22,15 @@ Se tendrán los endpoints:
 - Endpoint GET "/get_config": Retorna la configuración cargada.
 - Endpoint POST "/new_ssid": Actualiza el nombre de la red Wi-Fi.
 
-Para probar a cada uno de estos endpoints se provee un cliente para utilizarse desde un script de python
+Para probar a cada uno de estos endpoints se provee un cliente para utilizarse desde un script de Python.
+
+A modo de práctica conceptual, se implementó un parser HTTTP básico para los métodos GET y POST y el header Content-Length sobre el handler TCP. 
 
 ### 🖥️Plataforma
 Arduino IDE
+
+### 🎥Funcionamiento
+[![Prueba Concepto 1](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
 
 ---
 
@@ -34,25 +39,21 @@ Arduino IDE
 Código Fuente: [sources_prueba_2](https://github.com/NicolasTobiasAlmaraz/wifi_http_server/tree/main/prueba2)
 
 ### 🎯Objetivo
-El objetivo de esta prueba concepto es probar el funcionamiento del ESP32 como STA/AP, para eso tendrá el siguiente web server:
-- POST "/connect_wifi": Se conecta a una red Wi-Fi
-- GET "/wifi_connect_status": Verifica si ya se pudo conectar como STA a otra red y además si la red es compatible
+El objetivo de esta prueba concepto es probar el funcionamiento del ESP32 como STA/AP.
 
-Para esta prueba, se combina con la Prueba Concepto 1:
-- ESP32_A: tiene el firmware de la prueba concepto 1
-- ESP32_B: tiene el firmware de la prueba concepto 2
-- 
-La prueba consiste en lo siguiente:
-- Mediante un cliente se le indica al ESP32_A las credenciales del ESP32_B
-- El ESP32_A usa el endpoint /get_config y verifica que los parámetros sean compatibles
-  - Si los parámetros son compatibles se queda conectado
-  - Si los parámetros no son compatibles se desconecta
- 
-En todo momento puede consultarse el estado de la conexión con el endpoint /wifi_connect_status:
-- Desconectado
-- Conectando
-- Verificando
-- Conectado
+Para eso, se tendrán dos ESP32:
+- ESP32 master: Es un ESP32 con el código de la ```Prueba Concepto 1`` 
+- ESP32 slave: Es un ESP32 funcionando como STA/AP
+
+El ESP32 Slave genera una red Wi-Fi y recibe solicitudes HTTP hechas por un script de Python. En el web server del ESP32 Slave se tienen los siguientes endpoints:
+- POST "/connect_wifi": Se le indican las credenciales Wi-Fi del ESP32 Master
+- GET "/wifi_connect_status": Verifica si ya se pudo conectar como STA a la red del ESP32 Master
+
+La prueba será entonces hacer que el ESP32 Slave se conecte al ESP32 Master. En ese momento el ESP32 Slave se queda esperando la solicitud /wifi_connect_status para avisarle al cliente que se conectó exitosamente.
+Luego, para verificar la efectividad de la conexión, el ESP32 Slave enviará solicitudes POST /set_led, de tal modo que el led del ESP32 master cambie de estado.
 
 ### 🖥️Plataforma
 Arduino IDE
+
+### 🎥Funcionamiento
+[![Prueba Concepto 2](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
