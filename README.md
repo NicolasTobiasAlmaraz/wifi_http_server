@@ -49,11 +49,13 @@ El ESP32 Slave genera una red Wi-Fi y recibe solicitudes HTTP hechas por un scri
 - POST "/connect_wifi": Se le indican las credenciales Wi-Fi del ESP32 Master
 - GET "/wifi_connect_status": Verifica si ya se pudo conectar como STA a la red del ESP32 Master
 
-La prueba será entonces hacer que el ESP32 Slave se conecte al ESP32 Master. En ese momento el ESP32 Slave se queda esperando la solicitud /wifi_connect_status para avisarle al cliente que se conectó exitosamente.
+La prueba será entonces hacer que el ESP32 Slave se conecte al ESP32 Master. En ese momento el ESP32 Slave se queda esperando la solicitud /wifi_connect_status para avisarle al cliente (script Python) que se conectó exitosamente.
+
 Luego, para verificar la efectividad de la conexión, el ESP32 Slave enviará solicitudes POST /set_led, de tal modo que el led del ESP32 master cambie de estado.
 
 ### 🖥️Plataforma
 Arduino IDE
 
 ### 🎥Funcionamiento
-[![Prueba Concepto 2](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Prueba Concepto 2](https://img.youtube.com/vi/96kvuOUdJv8/0.jpg)](https://www.youtube.com/watch?v=96kvuOUdJv8)
+
