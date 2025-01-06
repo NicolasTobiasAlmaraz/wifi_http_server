@@ -26,11 +26,11 @@ def send_http_request(ip, path, method="POST", headers=None, body=None):
             print("Método HTTP no soportado. Use 'GET' o 'POST'.")
             return None
         
-        print("\n-------------------------------------------\n")
+        print("\n\n")
 
         print(f"Respuesta del servidor (código {response.status_code}):")
         print(response.text)
-        return response
+        return response.status_code
 
     except requests.exceptions.RequestException as e:
         print(f"Error al enviar la solicitud: {e}")
@@ -63,14 +63,24 @@ def send_wifi_connect_status():
     headers = None
     
     # Enviar solicitud
-    send_http_request(esp32_ip, path, method=method, headers=headers, body=None)
+    response = send_http_request(esp32_ip, path, method=method, headers=headers, body=None)
+    return response
 
 #Envio credenciales
+print("Inicio Prueba")
 send_wifi_connect_status()
-send_wifi_connect("ESP32_MASER","master1234")
+print("-------------------------------")
+
+send_wifi_connect("ESP32_MASTER","master1234")
+print("-------------------------------")
 time.sleep(5)
 
 #Chequeo estado cada 1 seg
 for i in range(0,5):
-    send_wifi_connect_status()
+    code = send_wifi_connect_status()
+    print("-------------------------------")
+    if(code==200):
+        break
     time.sleep(1)
+
+print("Fin prueba, quedó conectado!")

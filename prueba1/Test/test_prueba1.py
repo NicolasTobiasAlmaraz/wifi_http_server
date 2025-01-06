@@ -82,6 +82,12 @@ def send_get_config():
     # Enviar solicitud
     send_http_request(esp32_ip, path, method=method, headers=headers, body=None)
 
-send_led(0)
-send_get_config()
+print("-------------------------------")
+send_led(1)
+print("-------------------------------")
+
+
+#send_get_config()
+#print("-------------------------------")
 #send_new_ssid("master_wifi_2")
+#print("-------------------------------")

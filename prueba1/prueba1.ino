@@ -4,8 +4,8 @@
 #include "http_endpoints_types.h"
 
 //Defino credenciales WiFi e IP Fija
-const char ssid[] = "ESP32_MASTER";      //SSID
-const char psw[] = "master1234";           //PSW
+const char ssid[] = "ESP32_MASTER";     //SSID
+const char psw[] = "master1234";        //PSW
 IPAddress ip = IPAddress(192,168,0,1);  //IP
 MobileApp app(ssid, psw, ip);
 

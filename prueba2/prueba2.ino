@@ -12,11 +12,10 @@ String master_ssid = "";
 String master_password = "";
 char master_ssid_char[20];
 char master_password_char[20];
-const String url = "http://192.168.0.1/get_config"; // Dirección del servidor
+const String url_get_config = "http://192.168.0.1/get_config";
 
 //Led indicador
 const int LED_PIN = 2;
-#define WIFI_DEBUG_LEVEL WIFI_LOG_VERBOSE
 
 //Web server
 WebServer server(80);
@@ -25,7 +24,7 @@ WebServer server(80);
 typedef enum {
   DESCONECTADO,
   CONECTANDO,
-  VERIFICANDO,
+  CONECTADO_STA_AP,
   CONECTADO,
 } estado_t;
 
@@ -35,8 +34,12 @@ IPAddress ap_ip_local(192, 168, 0, 1);
 IPAddress ap_ip_gw(192, 168, 0, 1);
 IPAddress ap_subnet(255, 255, 255, 0);
 
+bool flag_aviso_conexion = false;
+
 // Configuración inicial de Wi-Fi en modo AP
 void setup_wifi_ap() {
+  // Configuro STA/AP
+  WiFi.mode(WIFI_AP_STA);
   WiFi.softAP(ssid_ap, password_ap);
   WiFi.softAPConfig(ap_ip_local, ap_ip_gw, ap_subnet);
   Serial.println("AP configurado");
@@ -72,7 +75,7 @@ void handle_connect_wifi() {
   master_password = password;
     
   if (master_ssid.length() && master_password.length()) {
-    server.send(200, "application/json", "{\"message\":\"Intentando conectar al Wi-Fi...\"}");
+    server.send(200, "application/json", "{\"message\":\"Intentando conectar al Wi-Fi\"}");
     Serial.println("Intentando conectar al master Wi-Fi:");
     estado = CONECTANDO;
   } else {
@@ -80,6 +83,54 @@ void handle_connect_wifi() {
     Serial.println("Faltan parámetros 'ssid' o 'password'");
     estado = DESCONECTADO;
   }
+}
+
+const char* wl_status_to_string(wl_status_t status) {
+  switch (status) {
+    case WL_NO_SHIELD: return "WL_NO_SHIELD";
+    case WL_IDLE_STATUS: return "WL_IDLE_STATUS";
+    case WL_NO_SSID_AVAIL: return "WL_NO_SSID_AVAIL";
+    case WL_SCAN_COMPLETED: return "WL_SCAN_COMPLETED";
+    case WL_CONNECTED: return "WL_CONNECTED";
+    case WL_CONNECT_FAILED: return "WL_CONNECT_FAILED";
+    case WL_CONNECTION_LOST: return "WL_CONNECTION_LOST";
+    case WL_DISCONNECTED: return "WL_DISCONNECTED";
+  }
+}
+
+//Defino callbacks
+void handle_connect_wifi();
+void handle_wifi_status();
+
+void setup() {
+  //Inicializo UART
+  Serial.begin(115200);
+  Serial.println("Prueba 2 STA/AP con HTTP bidireccional");
+  
+  // Inicializamos el AP
+  setup_wifi_ap();
+
+  // Configurar las rutas
+  server.on("/connect_wifi", HTTP_POST, handle_connect_wifi);
+  server.on("/connect_wifi_status", HTTP_GET, handle_wifi_status);
+
+  // Iniciar el servidor
+  server.begin();
+  Serial.println("Servidor HTTP iniciado");
+
+  //Config led
+  pinMode(LED_PIN, OUTPUT);
+
+  //Estado inicial
+  estado = DESCONECTADO;
+}
+
+void loop() {
+  // Manejar las solicitudes HTTP
+  server.handleClient();
+
+  //Maquinas de estados
+  maquina_estados();
 }
 
 // Manejo del GET para "/wifi_connect_status"
@@ -94,11 +145,13 @@ void handle_wifi_status() {
     case CONECTANDO:
       wifi_status = "CONECTANDO";
       break;
-    case VERIFICANDO:
-      wifi_status = "VERIFICANDO";
-      break;
     case CONECTADO:
+      wifi_status = "CONECTADO APAGANDO WIFI";
+      flag_aviso_conexion = true;
+      break;
+    case CONECTADO_STA_AP:
       wifi_status = "CONECTADO";
+      flag_aviso_conexion = true;
       break;
   }
   Serial.println("Llega solicitud status:");
@@ -112,33 +165,15 @@ void maquina_estados() {
   float frecuencia;
   DeserializationError error;
   static String payload = "";
-  static HTTPClient http;
   StaticJsonDocument<200> doc;
-
+  HTTPClient http;
+      
   switch (estado) {
     case DESCONECTADO:
       break;
     case CONECTANDO:
-      // Cambio de IP del AP antes de conectar como STA
-      //WiFi.softAPConfig(ap_ip_aux, ap_ip_gw_aux, ap_subnet);
-      //Serial.println("IP del AP cambiada a evitar conflictos.");
-      //Serial.print("IP de AP: ");
-      //Serial.println(WiFi.softAPIP());
-      
-      // Cerrar conexiones activas de clientes HTTP
-      //server.stop();
-      
-      //todo probar esto
-      WiFi.disconnect(false);
-      delay(500);
-      /////////
-      
-      // Configuro STA/AP
-      //WiFi.mode(WIFI_AP_STA);
-
       // Inicio como STA
       Serial.println("Conectando...");
-      
       strcpy(master_ssid_char,master_ssid.c_str());
       strcpy(master_password_char, master_password.c_str());
       WiFi.begin(master_ssid.c_str(), master_password.c_str());
@@ -147,149 +182,58 @@ void maquina_estados() {
       while (WiFi.status() != WL_CONNECTED && tries < 10) { // Máximo 10 intentos
         delay(1000);
         Serial.print(".");
-        tries++;
-        WiFi.printDiag(Serial);    
-        Serial.println(WiFi.status());
+        tries++; 
+        Serial.println(wl_status_to_string(WiFi.status()));
       }
-
-      // Reiniciar servidor
-      //server.begin();
-      //Serial.println("Servidor HTTP reiniciado.");
 
       //Me fijo si conectó bien
       if (WiFi.status() == WL_CONNECTED) {
         Serial.println("Conexión exitosa");
-        estado = VERIFICANDO;
-      } else {
-        Serial.println("No se pudo conectar, volviendo a DESCONECTADO");
-        WiFi.disconnect(); // Desconecta si falla
-        estado = DESCONECTADO;
+        Serial.print("IP de STA: ");
+        Serial.println(WiFi.localIP());
+        estado = CONECTADO_STA_AP;
+        flag_aviso_conexion = false;
       }
       break;
 
-    case VERIFICANDO:
-      Serial.println("Verificando modelo...");
-      // Realizar la solicitud HTTP GET al servidor externo
-      http.begin(url);
-      httpCode = http.GET();
-
-      //Si recibo un error salgo
-      if (httpCode != 200) {
-        estado = DESCONECTADO;
+    case CONECTADO_STA_AP:
+      if(flag_aviso_conexion) {
+        estado = CONECTADO;
+        delay(500);
+        server.stop();
+        WiFi.mode(WIFI_STA);
+        delay(500);
+      }
+      break;
+    
+    case CONECTADO:
+      if (WiFi.status() != WL_CONNECTED) {
         WiFi.disconnect();
-        Serial.println("Error al obtener configuración.");
-        http.end();
+        delay(100);
+        setup();
         break;
       }
+    
+      static bool led_status = true;
+      led_status = !led_status; // Alterna el estado del LED
 
-      //Si la solicitud fue exitosa me fijo si esta bien config
-      payload = http.getString();
-      Serial.println("---------------");
-      Serial.println("Llega este payload:");
-      Serial.println(payload);
-      Serial.println("---------------");
+      // Configurar HTTP POST
+      http.begin("http://192.168.0.1:80/set_led");
+      http.addHeader("Content-Type", "application/json");
 
-      error = deserializeJson(doc, payload);
-      if (error != DeserializationError::Ok) {
-        Serial.println("Error en el json");
-        Serial.println(error.c_str());
-        return;
-      }
-      frecuencia = doc["frecuencia"].as<float>();
+      // Crear el JSON
+      doc["led"] = 2;
+      doc["state"] = led_status;
+      String json_payload;
+      serializeJson(doc, json_payload);
 
-      if (frecuencia == 50) {
-        estado = CONECTADO;
-        Serial.println("Modelo valido, frecuencia=50");
-        WiFi.softAPdisconnect(true);
-        Serial.println("AP desactivado, operando solo como STA.");
-        digitalWrite(LED_PIN, HIGH);
-      } else {
-        estado = DESCONECTADO;
-        WiFi.disconnect();
-        Serial.println("Modelo no compatible. Frecuencia no es 50.");
-      }
+      // Enviar la solicitud POST
+      httpCode = http.POST(json_payload);
+
+      // Verificar respuesta
+      Serial.printf("POST enviado. Código de respuesta: %d\n", httpCode);  
       http.end();
-      break;
-
-    case CONECTADO:
+      sleep(1); // Pausa entre envíos
       break;
   }
 }
-
-void setup() {
-  Serial.begin(115200);
-
-  // Configuro STA/AP
-  WiFi.mode(WIFI_AP_STA);
-
-  // Inicializamos el AP
-  setup_wifi_ap();
-
-  // Configurar las rutas
-  server.on("/connect_wifi", HTTP_POST, handle_connect_wifi);
-  server.on("/connect_wifi_status", HTTP_GET, handle_wifi_status);
-
-  // Iniciar el servidor
-  server.begin();
-  Serial.println("Servidor HTTP iniciado");
-
-  //Config led
-  pinMode(LED_PIN, OUTPUT);
-}
-
-void loop() {
-  // Manejar las solicitudes HTTP
-  server.handleClient();
-
-  //Maquinas de estados
-  maquina_estados();
-}
-
-/*
-#include <WiFi.h>
-
-// Configuración del Punto de Acceso (AP)
-const char* ap_ssid = "ESP32_AP";
-const char* ap_password = "12345678";
-
-// Credenciales de la red a la que se conectará como Estación (STA)
-const char* sta_ssid = "ESP32_MASTER";
-const char* sta_password = "master1234";
-
-void setup() {
-  // Inicializa la comunicación serial para depuración
-  Serial.begin(115200);
-
-  // Configura el ESP32 para operar en modo AP+STA
-  WiFi.mode(WIFI_AP_STA);
-
-  // Inicia el Punto de Acceso (AP)
-  WiFi.softAP(ap_ssid, ap_password);
-  Serial.println("Punto de Acceso iniciado:");
-  Serial.print("SSID: ");
-  Serial.println(ap_ssid);
-  Serial.print("IP del AP: ");
-  Serial.println(WiFi.softAPIP());
-
-  // Espera un momento antes de intentar la conexión como STA
-  delay(5000);
-
-  // Conecta a la red externa como Estación (STA)
-  WiFi.begin(sta_ssid, sta_password);
-  Serial.println("Conectando a la red externa...");
-
-  // Espera hasta que la conexión se establezca
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print(".");
-  }
-
-  // Una vez conectado, muestra la IP asignada
-  Serial.println("\nConexión a la red externa establecida.");
-  Serial.print("IP del STA: ");
-  Serial.println(WiFi.localIP());
-}
-
-void loop() {
-  // Aquí puedes agregar el código que desees ejecutar continuamente
-}*/
