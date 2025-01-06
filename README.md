@@ -30,7 +30,7 @@ A modo de práctica conceptual, se implementó un parser HTTTP básico para los 
 Arduino IDE
 
 ### 🎥Funcionamiento
-[![Prueba Concepto 1](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Prueba Concepto 1](https://img.youtube.com/vi/bc_M6ueIpgA/0.jpg)](https://www.youtube.com/watch?v=bc_M6ueIpgA)
 
 ---
 
